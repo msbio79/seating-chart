@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>우리 반 자리 배치표</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- 좌측: 설정 및 입력 패널 (2단 컬럼으로 확장) -->
+        <aside class="controls-panel no-print" style="flex: 0 0 650px; display: flex; flex-direction: column; gap: 0;">
+            <h1 class="app-title" style="padding-bottom: 15px; margin-bottom: 15px; width: 100%;">🏫 자리 배치 프로그램</h1>
+
+            <div style="display: flex; gap: 20px; flex: 1; min-height: 0;">
+                <!-- 1열: 학생 관리 구역 -->
+                <div class="panel-column"
+                    style="flex: 1; display: flex; flex-direction: column; gap: 15px; border-right: 1px solid var(--border-color); padding-right: 20px;">
+                    <div class="control-group">
+                        <label style="font-size: 0.95rem; color: var(--primary-color); font-weight: 700;">🏢 학급
+                            정보</label>
+                        <input type="text" id="class-title-input" placeholder="학급명 입력 (예: 1학년 2반)"
+                            style="width: 100%; padding: 12px; border: 2px solid var(--primary-color); border-radius: 8px; font-weight: 700; font-size: 0.95rem; background-color: #f0f9ff; text-align: center; color: var(--primary-color); box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
+                    </div>
+
+                    <!-- 결번체크 안내 간소화 (Ctrl+V 삭제) -->
+                    <div class="roster-help" style="margin-bottom: 5px; font-size: 0.85rem; padding: 8px;">
+                        💡 끝번호는 학생수보다 같거나 많게 설정<br>
+                        💡 학급의 결번이 있으면 먼저 체크<br>
+                        💡 1번 칸에 엑셀의 명렬표 복사-붙여넣기
+                    </div>
+
+
+                    <div class="control-group" style="flex: 1; display: flex; flex-direction: column;">
+                        <div
+                            style="background-color: var(--primary-color); color: white; padding: 10px; border-radius: 6px; text-align: center; margin-bottom: 8px; font-weight: 800; line-height: 1.4;">
+                            <span style="font-size: 1.15rem;">학생 명렬표</span><br><span style="font-size: 0.85rem; font-weight: 500;">(엑셀의 학생 명단을 1번에 복사)</span>
+                        </div>
+                        <label style="font-size: 0.95rem; margin-bottom: 8px; text-align: right; font-weight: 600;">끝번호: <input
+                                type="number" id="total-numbers" value="36"
+                                style="width: 50px; padding: 4px; text-align: center; border: 2px solid #cbd5e1; border-radius: 4px; font-weight:700;">번</label>
+                        <div class="roster-list" id="roster-list" style="height: 360px;">
+                            <!-- JavaScript가 번호 칸을 자동 생성합니다 -->
+                        </div>
+                        <button id="btn-reset" class="btn"
+                            style="background-color: #f87171; color: white; padding: 12px; font-size: 0.95rem; font-weight: 600; width: 100%; margin-top: 10px;">
+                            <span class="icon">🗑️</span> 명단 삭제
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 2열: 자리 배치 및 규칙 제어 구역 -->
+                <div class="panel-column" style="flex: 1.1; display: flex; flex-direction: column; gap: 12px;">
+                    <!-- 자리배치 가이드: 중요하므로 최상단으로 이동 -->
+                    <div class="roster-help"
+                        style="margin: 0; padding: 10px; font-size: 0.85rem; background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; color: #166534;">
+                        💡 빈 자리는 미리 클릭하여 비워두기<br>
+                        💡 드래그나 클릭으로 학생 임의 변경 가능<br>
+                        💡 칠판 방향부터 자동 배치<br>
+                        💡 번호순이나 무작위 배치 방식으로 선정
+                    </div>
+
+                    <!-- 격자 및 시점 셋팅 -->
+                    <div class="control-group"
+                        style="background: #f8fafc; padding: 12px; border: 1.5px solid #cbd5e1; border-radius: 8px;">
+                        <div style="display: flex; gap: 12px; margin-bottom: 10px;">
+                            <div class="input-wrapper" style="flex:1;">
+                                <label style="font-size: 0.85rem; text-align: center; width: 100%;">가로 칸(열)</label>
+                                <input type="number" id="cols" value="6" min="1" max="10"
+                                    style="padding: 8px; text-align: center;">
+                            </div>
+                            <div class="input-wrapper" style="flex:1;">
+                                <label style="font-size: 0.85rem; text-align: center; width: 100%;">세로 칸(행)</label>
+                                <input type="number" id="rows" value="6" min="1" max="10"
+                                    style="padding: 8px; text-align: center;">
+                            </div>
+                        </div>
+                        <div
+                            style="border-top: 1.5px dashed #cbd5e1; padding-top: 10px; display: flex; justify-content: center; width: 100%;">
+                            <label class="view-toggle-label"
+                                style="cursor: pointer; font-size: 1rem; padding: 10px; width: 100%; display: flex; justify-content: center; align-items: center; background-color: #f1f5f9; border-radius: 6px; border: 1.5px solid #cbd5e1; font-weight: 700;">
+                                <input type="checkbox" id="view-toggle"
+                                    style="width: 20px; height: 20px; margin-right: 10px;">
+                                👨‍🏫 선생님 시점 전환
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 통합 실행 프레임: 번호순 설정부터 출력까지 -->
+                    <div
+                        style="background-color: #fff; border: 2px solid #e2e8f0; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; gap: 12px; box-shadow: var(--shadow-sm);">
+                        <!-- 번호순 배치 옵션 -->
+                        <div class="control-group" style="gap: 8px;">
+                            <label style="font-size: 1rem; color: #334155; font-weight: 800; text-align: center;">🔢
+                                번호순으로 앉기</label>
+                            <div style="display: flex; gap: 8px;">
+                                <select id="seq-direction" class="styled-select"
+                                    style="padding: 10px; font-size: 0.95rem; text-align: center;">
+                                    <option value="vertical" selected>세로 방향</option>
+                                    <option value="horizontal">가로 방향</option>
+                                </select>
+                                <select id="seq-start" class="styled-select"
+                                    style="padding: 10px; font-size: 0.95rem; text-align: center;">
+                                    <option value="left">왼쪽부터</option>
+                                    <option value="right">오른쪽부터</option>
+                                </select>
+                            </div>
+                            <button id="btn-sequential" class="btn btn-primary"
+                                style="padding: 14px; font-size: 1rem; background-color: #6366f1;">
+                                <span class="icon">✅</span> 번호순으로 배치
+                            </button>
+                        </div>
+
+                        <div style="border-top: 1px dashed #cbd5e1; margin: 5px 0;"></div>
+
+                        <!-- 무작위 및 기타 제어 버튼 -->
+                        <div class="button-group" style="margin-top: 0; gap: 10px;">
+                            <button id="btn-randomize" class="btn btn-primary"
+                                style="font-size: 1.1rem; padding: 18px; background-color: var(--primary-color);">
+                                <span class="icon">🎲</span> 무작위 배치
+                            </button>
+                            <button id="btn-clear-seats" class="btn"
+                                style="background-color: #94a3b8; color: white; padding: 18px; font-size: 0.95rem; font-weight: 600;">
+                                <span class="icon">↺</span> 자리 리셋
+                            </button>
+                            <button id="btn-print" class="btn"
+                                style="background-color: #1e293b; color: white; padding: 18px; font-size: 1.1rem; margin-top: 5px;">
+                                <span class="icon">🖨️</span> 고품질 출력 (인쇄하기)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 우측: 메인 영역 (제목과 보드를 완벽히 분리된 프레임으로 구성) -->
+        <main class="classroom-area" id="classroom-area">
+            <!-- 1. 제목 전용 독립 프레임 (배경색 포인트 추가) -->
+            <div class="title-frame"
+                style="width: 100%; display: flex; justify-content: center; margin-bottom: 25px; flex-shrink: 0; background-color: #f0f9ff; border: 2px solid var(--primary-color);">
+                <div class="print-class-title" id="print-class-title"
+                    style="margin-bottom: 0; padding-bottom: 0; border-bottom: none; color: var(--primary-color);">자리
+                    배치표</div>
+            </div>
+
+            <!-- 2. 교실 배치표 전용 독립 프레임 (캔버스 벽) -->
+            <div class="canvas-frame"
+                style="width: 100%; flex: 1; display: flex; flex-direction: column; align-items: center; background-color: rgba(255,255,255,0.5); border-radius: 20px; padding: 20px; border: 2px dashed #e2e8f0; min-height: 0;">
+                <!-- 회전 전용 레이아웃 래퍼 -->
+                <div id="classroom-board-wrapper" class="classroom-board-wrapper"
+                    style="flex: 1; display: flex; min-height: 0;">
+                    <div class="board-header">
+                        <h2>칠 판</h2>
+                    </div>
+                    <div id="desk-grid" class="desk-grid">
+                        <!-- 자바스크립트로 책상이 생성됩니다 -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

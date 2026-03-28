@@ -1,0 +1,870 @@
+:root {
+    --primary-color: #4f46e5;
+    --primary-hover: #4338ca;
+    --bg-color: #f1f5f9;
+    --panel-bg: #ffffff;
+    --board-bg: #ffffff;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+    --radius-md: 12px;
+    --radius-lg: 20px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    /* 화면 비율에 따라 상단이 잘리는 현상을 막기 위해 flex 중앙정렬을 풀고 자연스러운 흐름 선택 */
+    min-height: 100vh;
+    padding: 2vh 2vw;
+    margin: 0;
+}
+
+.app-container {
+    display: flex;
+    gap: 20px; /* 기존보다 타이트하게 묶어 프레임 보호 */
+    width: 100%;
+    max-width: 1500px; /* 대형 모니터까지 지원 확대 */
+    margin: 0 auto;
+    height: calc(100vh - 4vh);
+    min-height: 750px; /* 모니터(1366, 1080 등)가 세로로 짧아져도 찌그러짐을 방어하는 핵심 최소 높이 */
+}
+
+/* ==================
+   오른쪽: 자리 배치표 영역
+   ================== */
+.classroom-area {
+    background-color: white;
+    padding: 30px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg); 
+    flex: 1;
+    min-width: 0;
+    max-width: 1600px; /* 1450px에서 1600px로 더욱 시원하게 확장 */
+    display: flex;
+    flex-direction: column;
+    min-height: 800px;
+    border: 1px solid var(--border-color);
+}
+
+/* ==================
+   왼쪽: 컨트롤 패널
+   ================== */
+.controls-panel {
+    flex: 0 0 750px; /* 메뉴바 너비를 650px에서 750px로 넓힘 */
+    background: var(--panel-bg);
+    border-radius: var(--radius-lg);
+    padding: 20px 25px;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border: 1px solid var(--border-color);
+    overflow: hidden; /* 내부 컬럼들이 스크롤을 관리하므로 패널 전체 스크롤은 차단 */
+}
+
+/* 2단 컬럼 분리선 및 레이아웃 */
+.panel-column {
+    overflow-y: auto; /* 각 칸 내부에서 개별 스크롤링 지원 */
+    padding-right: 5px;
+}
+.panel-column::-webkit-scrollbar { width: 4px; }
+.panel-column::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+/* 자체 스크롤바 디자인 (화면이 작을때만 등장함) */
+.controls-panel::-webkit-scrollbar { width: 6px; }
+.controls-panel::-webkit-scrollbar-track { background: transparent; }
+.controls-panel::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+.app-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    text-align: center;
+    padding-bottom: 20px;
+    border-bottom: 2px dashed var(--border-color);
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.control-group label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.view-toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 1rem; /* 한 줄에 쏙 들어가도록 폰트 소폭 조정 */
+    font-weight: 700 !important;
+    color: #1e293b;
+    padding: 10px 10px;
+    background-color: white; 
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    transition: all 0.2s;
+    white-space: nowrap; /* 절대 두 줄이 되지 않도록 줄바꿈 방지 */
+}
+
+.view-toggle-label:hover {
+    background-color: #f1f5f9;
+}
+
+.view-toggle-label input {
+    cursor: pointer;
+    width: 20px; /* 체크박스 크기도 조화롭게 유지 */
+    height: 20px;
+}
+
+/* 스크롤 가능한 칸 나눔 명단 관리 패널: 8명 정도가 한눈에 보이게 높이 조정 */
+.roster-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    height: 360px; /* 8명 정도 보기에 가장 예쁜 높이로 고정 */
+    overflow-y: auto;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 10px;
+    background-color: #f8fafc;
+}
+
+.roster-list::-webkit-scrollbar { width: 6px; }
+.roster-list::-webkit-scrollbar-track { background: transparent; }
+.roster-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+.roster-slot {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s;
+}
+
+.roster-slot .slot-num {
+    font-weight: 700;
+    color: var(--primary-color);
+    width: 20px;
+    text-align: right;
+    font-size: 0.95rem;
+}
+
+.roster-slot input[type="text"] {
+    flex: 1;
+    min-width: 0; /* 강제로 칸이 부족할때 밀리지 않고 자연스럽게 줄어들도록 */
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    padding: 6px;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.roster-slot input[type="text"]:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.roster-slot .slot-missing-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap; /* 글씨가 세로로 두 줄이 되지 않도록 줄바꿈 방지 */
+    flex-shrink: 0; /* 결번 버튼 크기 축소 방지 */
+}
+
+.roster-slot.is-missing {
+    opacity: 0.6;
+    background-color: #f1f5f9;
+}
+
+.roster-slot.is-missing input[type="text"] {
+    text-decoration: line-through;
+    color: #94a3b8;
+    background-color: #e2e8f0;
+}
+
+/* 안내 도움말 텍스트 */
+.roster-help {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 5px;
+    background-color: #f0fdf4;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #dcfce7;
+    line-height: 1.4;
+}
+.roster-help b {
+    color: #166534;
+}
+
+.row-col-group {
+    flex-direction: row;
+    gap: 15px;
+}
+
+.input-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+input[type="number"] {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    text-align: center;
+    font-weight: 600;
+    transition: border-color 0.2s;
+}
+
+input[type="number"]:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.styled-select {
+    flex: 1;
+    padding: 8px 6px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-main);
+    background-color: white;
+    outline: none;
+    cursor: pointer;
+}
+
+.styled-select:focus {
+    border-color: var(--primary-color);
+}
+
+.button-group {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.btn {
+    border: none;
+    padding: 16px;
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 4px 6px rgba(79, 70, 229, 0.3);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 10px rgba(79, 70, 229, 0.4);
+}
+
+.sub-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-secondary {
+    flex: 1;
+    background-color: white;
+    color: var(--text-main);
+    border: 2px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+    background-color: #f8fafc;
+    border-color: #cbd5e1;
+    transform: translateY(-2px);
+}
+
+/* ==================
+   오른쪽: 메인 교실 영역
+   ================== */
+.classroom-area {
+    flex: 1;
+    background: var(--board-bg);
+    border-radius: var(--radius-lg);
+    padding: 30px;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 1px solid var(--border-color);
+    position: relative;
+    overflow-y: visible; 
+    min-height: 800px; /* 기존 1000px에서 800px로 줄여 화면 균형 조절 */
+    transition: all 0.5s ease;
+    justify-content: flex-start !important; 
+}
+
+.board-header {
+    width: 60%;
+    margin: 0 auto 20px auto;
+    padding: 15px;
+    background-color: #f8fafc;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    text-align: center;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+    transition: all 0.5s ease;
+}
+
+.board-header h2 {
+    color: var(--text-muted);
+    font-weight: 700;
+    letter-spacing: 5px;
+    margin: 0;
+}
+
+/* 선생님 시점 시각적 변환 랩핑 객체 (보드와 책상만 격리) */
+.classroom-board-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    align-items: center;
+    transition: all 0.5s ease;
+    flex: 0 0 auto; /* 강제 100% 채움 대신 내용물만큼만 차지하게 변경 */
+    margin-bottom: 50px;
+}
+
+.classroom-board-wrapper.teacher-view {
+    flex-direction: column-reverse; /* 칠판을 아래로 보내기 */
+    padding-top: 10px; /* 제목과의 간격 */
+    justify-content: flex-start;
+}
+
+.classroom-board-wrapper.teacher-view .board-header {
+    margin-bottom: 0px;
+    margin-top: 25px; /* 시각적 패딩 반전 */
+}
+
+.classroom-board-wrapper.teacher-view .desk-grid {
+    transform: rotate(180deg); /* 구형 브라우저/인쇄 엔진 호환을 위해 transform 속성 사용 */
+    transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.classroom-board-wrapper.teacher-view .desk-front {
+    transform: rotate(180deg); /* 카드 앞면 보정 */
+}
+
+.classroom-board-wrapper.teacher-view .desk-back {
+    transform: rotateY(180deg) rotateZ(180deg); /* 카드 뒷면은 기존 3D Y축 반전을 상속하면서 Z축으로 180도 추가 회전 */
+}
+
+
+/* 안내 박스 분리 */
+.instruction-box {
+    background-color: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    padding: 18px 25px;
+    border-radius: var(--radius-md);
+    margin-top: 10px;
+    margin-bottom: 30px; /* 하단 보드와의 초기 간격 */
+    width: 100%;
+    max-width: 900px; /* 자리 배치표 그리드와 동일한 가로 크기로 변경 */
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.instruction-box p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin: 0;
+}
+.instruction-box b {
+    color: var(--primary-color);
+}
+
+/* 그리드 레이아웃: 모니터 화면 크기에 맞춰 시원하게 변화하게끔 수정 */
+.desk-grid {
+    display: grid;
+    gap: 1.5vh; /* 고정 px 대신 화면 높이에 비례하는 간격으로 생동감 부여 */
+    width: 100%;
+    max-width: 1300px; /* 대형 화면에서 적절히 넓어지게 한도 확대 */
+    flex: 1;
+    transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    margin: 0 auto;
+    grid-template-columns: repeat(var(--cols, 6), 1fr);
+    grid-template-rows: repeat(var(--rows, 6), 1fr); /* 1fr로 설정하여 모든 칸이 프레임 내 동일 높이 점유 */
+    gap: 1.5vh; /* 칸 사이의 간격을 화면 높이에 비례하도록 개선 */
+    width: 100%;
+    height: 100%; /* 부모(wrapper) 안을 꽉 채워서 유동적으로 크기 변화 */
+    min-height: 50vh; /* 최소한의 공간은 확보 */
+    max-height: 85vh; /* 화면 밖으로 넘침 방지 */
+    perspective: 1500px;
+    align-content: stretch;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==================
+   카드(책상) 3D 플립 애니메이션
+   ================== */
+.desk {
+    position: relative;
+    width: 100%; /* 열 너비에 자동 맞춤 */
+    height: 100%; /* 행 높이에 자동 맞춤 */
+    /* 가로 대비 세로비가 깨지지 않게 보조하지만 그리드가 주도권을 가짐 */
+    min-height: 60px; 
+    cursor: grab;
+    user-select: none;
+    transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    background-color: transparent; /* 원본 검정 배경 제거 */
+}
+
+.desk-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform-style: preserve-3d;
+    /* pointer-events: none; 클릭 씹힘 원인이 될 수 있어 삭제 */
+}
+
+.desk.flipped .desk-inner {
+    transform: rotateY(180deg);
+}
+
+.desk-front, .desk-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: 700;
+    box-shadow: var(--shadow-sm);
+    border: 2px solid #e2e8f0;
+    transition: transform 0.8s ease; 
+}
+
+/* 카드 맨 앞면 (이름 뽑기 전 책상 모양) */
+.desk-front {
+    background-color: #f8fafc;
+    background-image: linear-gradient(to bottom, #f8fafc 80%, #e2e8f0 100%);
+}
+
+.desk:not(.flipped) .desk-front:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 8px rgba(79, 70, 229, 0.4);
+    transform: translateY(-2px);
+}
+
+/* 선생님 시점일 때 마우스 오버 시 뒤집힘(0도로 돌아감) 방지 */
+.teacher-view .desk:not(.flipped) .desk-front:hover {
+    transform: rotate(180deg) translateY(2px) !important;
+}
+
+/* 사용자가 빈자리로 미리 선택한 상태 */
+.desk.is-empty .desk-front {
+    background-image: none;
+    background-color: #f1f5f9;
+    border: 2px dashed #cbd5e1;
+    box-shadow: none;
+    transform: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 선생님 시점일 때 빈자리(제외됨) 회전 방지 */
+.teacher-view .is-empty .desk-front {
+    transform: rotate(180deg) !important;
+}
+
+.desk.is-empty .desk-front::after {
+    content: '✖ 제외됨';
+    color: #94a3b8;
+    font-size: min(1.3rem, 3.5vw); /* 글자 크기 유동적 */
+    font-weight: 800;
+}
+
+/* 선생님 시점 회전 시, 중복 회전 코드 제거 (부모에서 이미 회전 보정됨) */
+
+
+/* 카드 뒷면 (이름이 적힌 면) */
+.desk-back {
+    background-color: white;
+    color: var(--primary-color);
+    transform: rotateY(180deg);
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 10px rgba(79, 70, 229, 0.15);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+}
+
+.stu-num {
+    font-size: clamp(0.55rem, 1vw, 0.75rem);
+    font-weight: 700;
+    color: #fff;
+    background-color: #818cf8; 
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-bottom: 2px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    white-space: nowrap;
+}
+
+.stu-name {
+    font-size: clamp(0.7rem, 2vw, 1.15rem);
+    font-weight: 700;
+    white-space: nowrap; /* 글씨가 밖으로 나가지 않게 무조건 한줄표시 */
+    overflow: hidden;
+    text-overflow: ellipsis; /* 너무 길면 ... 으로 축약 */
+    max-width: 95%;
+    text-align: center;
+}
+
+.desk-back.empty {
+    color: var(--text-muted);
+    border-style: dashed;
+    border-color: #cbd5e1;
+    background-color: #f1f5f9;
+    box-shadow: none;
+    font-weight: 500;
+}
+
+.desk-back.empty .stu-name {
+    color: var(--text-muted);
+}
+
+
+/* 캔버스 화면 타이틀 디자인 (사용자 요청에 따른 세련된 UI) */
+/* 제목 및 캔버스 독립 프레임 스타일 */
+.title-frame {
+    background-color: #f0f9ff;
+    padding: 15px 40px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    border: 2px solid var(--primary-color);
+    z-index: 10;
+}
+
+#print-class-title {
+    width: auto;
+    text-align: center;
+    font-size: 2.22rem; /* 세밀한 크기 조정 */
+    font-weight: 800;
+    color: #1e293b;
+    margin: 0;
+    padding: 0;
+    letter-spacing: 5px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.05); 
+    white-space: nowrap;
+}
+
+.canvas-frame {
+    /* 캔버스 벽 역할을 수행하며 내부 요소가 제목을 침범하지 못하도록 격리 */
+    transition: all 0.5s ease;
+}
+
+/* ==================
+   드래그 앤 드롭 시각 효과
+   ================== */
+.desk.dragging {
+    opacity: 0.5; /* 드래그되는 원본 흐리게 처리 */
+}
+
+/* ==================
+   드래그 오버(가져다 댈 때) 테두리 반짝임 
+   ================== */
+/* 터치 클릭으로 자리 교환(스왑) 시 선택 및 성공 효과 - 프레임 내부 색상 강조 */
+.desk.selected-swap .desk-back {
+    border: 5px solid #eab308 !important; /* 선택 시 굵은 황금색 프레임 */
+    background-color: #fef08a !important; /* 내부를 밝은 황색으로 채워 선택됨을 표시 */
+    box-shadow: 0 0 25px rgba(234, 179, 8, 0.7) !important;
+    transform: scale(1.1) rotateY(180deg) !important; /* rotateY를 유지하여 3D 고정 */
+    transition: all 0.2s ease !important;
+    z-index: 100;
+}
+.desk.swap-flash .desk-back {
+    border: 5px solid #22c55e !important; /* 교환 성공 시 초록색 프레임 */
+    background-color: #bbf7d0 !important; /* 내부 초록광 */
+    box-shadow: 0 0 25px rgba(34, 197, 94, 0.7) !important;
+    transform: rotateY(180deg) !important;
+    transition: all 0.4s ease !important;
+}
+
+/* 선생님 시점일 때 스왑 관련 특수 효과에서도 회전 상태(180도) 고정 */
+.teacher-view .desk.selected-swap .desk-back {
+    transform: scale(1.1) rotateY(180deg) rotateZ(180deg) !important;
+}
+.teacher-view .desk.swap-flash .desk-back {
+    transform: rotateY(180deg) rotateZ(180deg) !important;
+}
+.teacher-view .desk.drag-over .desk-back {
+    transform: scale(1.08) rotateY(180deg) rotateZ(180deg) !important;
+}
+.teacher-view .desk.dragging .desk-back {
+    transform: rotateY(180deg) rotateZ(180deg) !important; /* 드래그 중에도 뒤집힘 방지 */
+    opacity: 0.7;
+}
+
+/* 드래그 오버 시 카드 내부 효과 */
+.desk.drag-over .desk-back {
+    border: 4px solid #4f46e5 !important;
+    background-color: #f5f3ff !important;
+    box-shadow: 0 0 25px rgba(79, 70, 229, 0.6) !important;
+    transform: scale(1.08) rotateY(180deg) !important;
+    transition: all 0.1s;
+    z-index: 50;
+}
+
+/* ==================
+   반응형 모바일 및 작은 모니터 창(스플릿 뷰) 지원
+   ================== */
+@media screen and (max-width: 1024px) {
+    body {
+        padding: 0;
+    }
+    .app-container {
+        flex-direction: column; /* 세로로 길게 배치 */
+        height: auto;
+        padding: 15px;
+        gap: 15px;
+    }
+    .controls-panel {
+        flex: none;
+        width: 100%;
+        height: auto;
+        overflow: visible;
+    }
+    .classroom-area {
+        height: 850px; /* 터치하면서 편하게 스크롤할 수 있도록 최소 높이 확보 */
+        padding: 20px;
+    }
+}
+
+/* ==================
+   고급 인쇄용 스타일 (큰 겉표지에 담긴 테이블 느낌)
+   ================== */
+@media print {
+    @page {
+        size: A4 landscape; /* 무조건 가로(A4)를 기본값으로 강제 */
+        margin: 0; /* 브라우저 마진을 0으로 줘서 머리글/바닥글(날짜, URL 등)이 들어갈 틈을 줘버리지 않게 원천 차단 */
+    }
+    html, body {
+        width: 100vw !important;
+        height: 100vh !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+        background: white !important;
+    }
+    .app-container {
+        height: 100vh !important; 
+        width: 100vw !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        display: block !important;
+        overflow: hidden !important;
+    }
+
+    .no-print { display: none !important; }
+    
+    .classroom-area {
+        border: 4px double #1e293b !important; /* 고품격 이중 테두리 적용 */
+        background-color: #ffffff !important;
+        box-shadow: none !important;
+        border-radius: 0 !important; 
+        padding: 8mm !important; /* 조금 더 넉넉한 인쇄 여백 */
+        margin: 0 !important;
+        height: 100vh !important;
+        width: 100vw !important;
+        min-height: auto !important;
+        box-sizing: border-box !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: flex-start !important; 
+        page-break-inside: avoid !important;
+        overflow: hidden !important; 
+    }
+
+    /* 인쇄 시에도 프레임 구조가 1페이지에 담기도록 제어 */
+    .title-frame {
+        border: 2px solid #1e293b !important; /* 인쇄 시에도 제목 박스 테두리 유지 */
+        background-color: #f8fafc !important;
+        box-shadow: none !important;
+        padding: 5px 20px !important;
+        margin-bottom: 12px !important;
+    }
+
+    .print-class-title {
+        width: auto !important;
+        font-size: 1.8rem !important;
+        border-bottom: none !important; /* 박스테두리가 있으므로 아래선 제거 */
+        padding-bottom: 0 !important;
+        color: #1e293b !important;
+    }
+
+    .canvas-frame {
+        background-color: transparent !important;
+        border: none !important;
+        padding: 0 !important;
+    }
+
+    .classroom-board-wrapper {
+        flex: 1 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important; 
+        height: 100% !important;
+        overflow: hidden !important;
+    }
+    
+    .board-header {
+        border: 2.5px solid #cbd5e1 !important; 
+        background-color: #f8fafc !important;
+        margin-bottom: 30px !important; /* 인쇄 시 칠판과 학생 사이 간격 확대 */
+        padding: 8px !important;
+        border-radius: 6px !important;
+        flex-shrink: 0 !important; 
+    }
+    .board-header h2 {
+        color: #334155 !important;
+        font-size: 1.2rem !important;
+        margin: 0 !important;
+    }
+
+    .desk-grid {
+        gap: 12px !important;
+        border: none !important; 
+        height: auto !important;
+        display: grid !important;
+        grid-template-rows: var(--print-rows, auto) !important; /* JS에서 계산된 행 높이 적용 (빈 줄 0px) */
+        overflow: visible !important; 
+        margin: 0 auto !important;
+    }
+    
+    .desk {
+        min-height: 0 !important;
+        height: auto !important;
+        overflow: visible !important; 
+        display: block !important;
+        margin-bottom: 5px !important; /* 칸 사이의 미세 여백 */
+    }
+    
+    .desk-back {
+        position: relative !important;
+        border: 2.2px solid #1e293b !important;
+        background-color: #ffffff !important;
+        border-radius: 6px !important;
+        color: #000 !important;
+        padding: 4px 10px !important; 
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 8px !important; 
+        min-height: 55px !important; /* 31명(6줄) 상황에 대비하여 55px로 정밀하게 재조정 */
+        width: 100% !important;
+        box-shadow: none !important;
+        transform: none !important;
+    }
+
+    /* 선생님 시점에서 인쇄하더라도 글씨가 뒤집히지 않게 최종 보정 */
+    .teacher-view .desk-back {
+        transform: rotateZ(180deg) !important;
+    }
+
+    .stu-name {
+        font-size: min(1.35rem, 5vw) !important; /* 화면 너비에 반응하여 이름 크기 자동 조절 */
+        font-weight: 800 !important;
+        color: #000 !important;
+        white-space: nowrap !important;
+        flex-shrink: 1 !important;
+        overflow: visible !important;
+    }
+
+    .stu-num {
+        background-color: #f1f5f9 !important; 
+        color: #1e293b !important;
+        font-size: 1rem !important; 
+        font-weight: 800 !important;
+        padding: 4px 12px !important; 
+        border-radius: 6px !important;
+        border: 1.5px solid #cbd5e1 !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* 빈자리 공백 처리: 자리가 밀리지 않게 가시성만 조절 */
+    .desk.is-empty {
+        display: block !important;
+        visibility: hidden !important; 
+        height: auto !important; 
+        min-height: 40px !important; /* 빈 칸도 자리를 지켜야 열이 밀리지 않음 */
+    }
+    
+    .desk.is-extra {
+        display: block !important;
+        visibility: hidden !important;
+        height: auto !important;
+    }
+    
+    .desk-inner {
+        transform: none !important;
+        display: block !important;
+        height: auto !important;
+    }
+    .desk-front {
+        display: none !important;
+    }
+
+    /* 인쇄 환경에서의 선생님 시점 적용 (!important 간의 충돌 방지) */
+    .classroom-board-wrapper.teacher-view {
+        flex-direction: column-reverse !important; /* 항상 칠판을 아래로 */
+    }
+    .classroom-board-wrapper.teacher-view .board-header {
+        margin-bottom: 0 !important;
+        margin-top: 25px !important; /* 선생님 시점 인쇄 시에도 칠판과 학생 사이 간격 충분히 확보 */
+    }
+} /* @media print의 닫는 중괄호 확행 */
